@@ -7,6 +7,38 @@ import json, requests, time, getpass
 app = Flask(__name__)
 api = Api(app)
 
+
+class FetchRepo(Resource):      #To get the Repository Information for subjects
+   
+    def __init__(self):  
+        #Initializing global object of Commander class
+        global Commander_Obj 
+        self.server = Commander_Obj
+        
+        super(FetchRepo, self).__init__()
+        
+        self.ProcessRequest = reqparse.RequestParser()
+
+        # Setting Parameters for JSON 
+        self.ProcessRequest.add_argument('FetchStatus', type=int, location = 'json') 
+        self.ProcessRequest.add_argument('FindCyclo', type=float, location='json')
+
+    def get(self):
+        args = self.ProcessRequest.parse_args()
+        if args['FetchStatus'] == False:  #Check repository is not pulled yet 
+           
+            return {'repo': "https://github.com/Prashant00005/Distributed_File_Systems"}
+        
+        if args['pullStatus'] == True:
+            self.server.Current_Subjects = self.server.Current_Subjects + 1
+            if self.server.Current_Subjects == self.server.numWorkers:
+                #Starting Timer
+                self.server.timer = time.time() 
+            print("Number of Subject : ".format(self.server.Current_Subjects))
+
+api.add_resource(FetchRepo, "/repo", endpoint="repo")
+
+
 class CommanderServer():
     
     def __init__(self):
