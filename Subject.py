@@ -10,7 +10,7 @@ def run():
     req = requests.get("http://{}:{}/repo".format(IP_Commander,Port_Commander), json={'FetchStatus': False})
     string_json = json.loads(req.text)
     Url_Repository = string_json['repo']
-    subprocess.call(["bash", "workerInitScript.sh", Url_Repository])
+    subprocess.call(["bash", "SubjectScript.sh", Url_Repository])
 
     req = requests.get("http://{}:{}/repo".format(IP_Commander,Port_Commander), json={'FetchStatus': True}) 
 
@@ -31,7 +31,7 @@ def run():
             if string_json['msg'] == -1:
                 print("All done!!")
                 break
-            subprocess.call(["bash", "workerGetCommit.sh", string_json['msg']])
+            subprocess.call(["bash", "SubjectCommit.sh", string_json['msg']])
             
             RadonOutput = subprocess.check_output(["radon", "cc", "-s", "-a" , "workerData"])
             
