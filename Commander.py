@@ -32,38 +32,40 @@ class FindCyclomaticComp(Resource):     #To find commits and find cyclomatic aom
         
         tempVal = self.server.List_Commits[0]
         del self.server.List_Commits[0] 
-        print("Resp: ".format(tempVal))
+        print("Resp: {}".format(tempVal))
         return {'msg':tempVal}
 
 
     def post(self):     #If Request is Post
         
         args = self.ProcessRequest.parse_args() 
-        
-        print("CommitSub got is ".format(args['CommitSub']))
-        print("CycloComp got is".format(args['CycloComp']))
+        Length_Total_List_CC = len(self.server.Total_List_CC)
+        print("CommitSub got is {}".format(args['CommitSub']))
+        print("CycloComp got is {}".format(args['CycloComp']))
 
         self.server.Total_List_CC.append({'CS':args['CommitSub'], 'CC':args['CycloComp']})
        
         print(self.server.Total_List_CC)
         print(self.server.List_Commits)
         
-        if len(self.server.Total_List_CC) == self.server.totalNumberOfCommits: 
-            endTime = time.time() - self.server.startTime
-            print("finished in {} seconds".format(endTime))
+        if Length_Total_List_CC == self.server.totalCommits: 
+            LastTime = time.time() - self.server.startTime
+            
+            print("End in {} seconds".format(LastTime))
             print(len(self.server.Total_List_CC))
-            totalAverageCC = 0
+            
+            Average_CC = 0
         
             for a in self.server.Total_List_CC:
             
                 if a['CC'] > 0:
-                    totalAverageCC = totalAverageCC + a['CC']
+                    Average_CC = Average_CC + a['CC']
                 else:
                     print("Commit {} has no computable files".format(a['CS']))
             
-            totalAverageCC = totalAverageCC / len(self.server.Total_List_CC)
+            Average_CC = Average_CC / Length_Total_List_CC
             
-            print("The Final Cyclomatic Complexity of the given repository is: ".format(totalAverageCC))
+            print("The Final Cyclomatic Complexity of the given repository is: {}".format(Average_CC))
         
         return {'success':True}
 
@@ -98,7 +100,7 @@ class FetchRepo(Resource):      #To get the Repository Information for subjects
             if self.server.Current_Subjects == self.server.Subjects:
                 #Starting Timer
                 self.server.timer = time.time() 
-            print("Number of Subject : ".format(self.server.Current_Subjects))
+            print("Number of Subject : {}".format(self.server.Current_Subjects))
 
 
 api.add_resource(FetchRepo, "/repo", endpoint="repo")
