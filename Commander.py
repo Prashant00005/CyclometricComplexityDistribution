@@ -8,6 +8,70 @@ app = Flask(__name__)
 api = Api(app)
 
 
+class FindCyclomaticComp(Resource):     #To find commits and find cyclomatic aomplexities
+    def __init__(self):  
+        #Initializing global object of Commander class
+        global Commander_Obj 
+        self.server = Commander_Obj
+        
+        super(FindCyclomaticComp, self).__init__() 
+        self.ProcessRequest = reqparse.RequestParser()
+
+       
+        self.ProcessRequest.add_argument('CommitSub', type=str, location = 'json')  
+        self.ProcessRequest.add_argument('CycloComp', type=float, location='json')
+
+    def get(self):      #If Request is Get
+        Length_List_Commits = len(self.server.List_Commits)
+        if self.server.Current_Subjects < self.server.Subjects:
+            time.sleep(0.1)
+            return {'msg': -2}
+        
+        if Length_List_Commits == 0: 
+            return {'msg': -1}
+        
+        tempVal = self.server.List_Commits[0]
+        del self.server.List_Commits[0] 
+        print("Resp: ".format(tempVal))
+        return {'msg':tempVal}
+
+
+    def post(self):     #If Request is Post
+        
+        args = self.ProcessRequest.parse_args() 
+        
+        print("CommitSub got is ".format(args['CommitSub']))
+        print("CycloComp got is".format(args['CycloComp']))
+
+        self.server.Total_List_CC.append({'CS':args['CommitSub'], 'CC':args['CycloComp']})
+       
+        print(self.server.Total_List_CC)
+        print(self.server.List_Commits)
+        
+        if len(self.server.Total_List_CC) == self.server.totalNumberOfCommits: 
+            endTime = time.time() - self.server.startTime
+            print("finished in {} seconds".format(endTime))
+            print(len(self.server.Total_List_CC))
+            totalAverageCC = 0
+        
+            for a in self.server.Total_List_CC:
+            
+                if a['CC'] > 0:
+                    totalAverageCC = totalAverageCC + a['CC']
+                else:
+                    print("Commit {} has no computable files".format(a['CS']))
+            
+            totalAverageCC = totalAverageCC / len(self.server.Total_List_CC)
+            
+            print("The Final Cyclomatic Complexity of the given repository is: ".format(totalAverageCC))
+        
+        return {'success':True}
+
+
+api.add_resource(FindCyclomaticComp, "/Cyclo", endpoint="Cyclo")
+
+
+
 class FetchRepo(Resource):      #To get the Repository Information for subjects
    
     def __init__(self):  
@@ -29,12 +93,13 @@ class FetchRepo(Resource):      #To get the Repository Information for subjects
            
             return {'repo': "https://github.com/Prashant00005/Distributed_File_Systems"}
         
-        if args['pullStatus'] == True:
+        if args['FetchStatus'] == True:
             self.server.Current_Subjects = self.server.Current_Subjects + 1
-            if self.server.Current_Subjects == self.server.numWorkers:
+            if self.server.Current_Subjects == self.server.Subjects:
                 #Starting Timer
                 self.server.timer = time.time() 
             print("Number of Subject : ".format(self.server.Current_Subjects))
+
 
 api.add_resource(FetchRepo, "/repo", endpoint="repo")
 
